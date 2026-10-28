@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracking ร้านค้า</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #166fe5;
+        }
+        .result-box {
+            margin-top: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .result-item {
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #444;
+        }
+        .btn-courier {
+            display: block;
+            text-align: center;
+            background-color: #2e7d32;
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>📦 Tracking ร้านค้า</h2>
+    <p style="text-align: center; font-size: 14px; color: #666;">พิมพ์ชื่อผู้รับเพื่อค้นหา</p>
+    <input type="text" id="searchName" placeholder="พิมพ์ชื่อผู้รับที่นี่...">
+    <button onclick="searchTracking()">ค้นหา</button>
+
+    <div id="resultContainer" class="result-box"></div>
+</div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlmwuF8fdGizUUkYLINmyoR4jVdjJQcZMo3VmJZY7G1M4I8Q4DeDQYbTTHVfZ4L4Cj/exec"; // แทนที่ด้วย URL ที่ได้จาก Google Apps Script
+
+    function searchTracking() {
+        const name = document.getElementById("searchName").value.trim();
+        const container = document.getElementById("resultContainer");
+        
+        if (!name) {
+            alert("กรุณาพิมพ์ชื่อผู้รับก่อนค้นหา");
+            return;
+        }
+
+        container.style.display = "block";
+        container.innerHTML = "กำลังค้นหาข้อมูล...";
+
+        fetch(`${WEB_APP_URL}?name=${encodeURIComponent(name)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length === 0) {
+                    container.innerHTML = "❌ไม่พบข้อมูลพัสดุในชื่อนี้";
+                    return;
+                }
+
+                let html = "";
+                data.forEach(item => {
+                    html += `
+                        <div class="result-item">👤 <b>ชื่อผู้รับ:</b> ${item.name}</div>
+                        <div class="result-item">📅 <b>วันที่ส่ง:</b> ${item.date}</div>
+                        <div class="result-item">🚚 <b>ขนส่ง:</b> ${item.courier}</div>
+                        <div class="result-item">🏷️ <b>เลขพัสดุ:</b> ${item.trackingNo}</div>
+                        <div class="result-item">📌 <b>สถานะ:</b> ${item.status}</div>
+                        <div class="result-item">📝 <b>หมายเหตุ:</b> ${item.note || '-'}</div>
+                    `;
+                    if (item.link) {
+                        html += `<a href="${item.link}" target="_blank" class="btn-courier">🔗 คลิกเพื่อเช็คพัสดุกับเว็บขนส่ง</a>`;
+                    }
+                });
+                container.innerHTML = html;
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                container.innerHTML = "เกิดข้อผิดพลาดในการดึงข้อมูล";
+            });
+    }
+</script>
+
+</body>
+</html>
