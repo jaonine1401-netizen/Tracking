@@ -90,7 +90,22 @@
 </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlmwuF8fdGizUUkYLINmyoR4jVdjJQcZMo3VmJZY7G1M4I8Q4DeDQYbTTHVfZ4L4Cj/exec"; // แทนที่ด้วย URL ที่ได้จาก Google Apps Script
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlmwuF8fdGizUUkYLINmyoR4jVdjJQcZMo3VmJZY7G1M4I8Q4DeDQYbTTHVfZ4L4Cj/exec"; // ใช้ URL เดิมของคุณ
+
+    // ฟังก์ชันสำหรับแปลงวันที่ให้อยู่ในรูปแบบ DD/MM/YYYY (หรือ พ.ศ.)
+    function formatDate(dateString) {
+        if (!dateString) return '-';
+        // ตัดเอาเฉพาะส่วนวันที่ (YYYY-MM-DD) ก่อนแปลง
+        let datePart = dateString.split('T')[0];
+        let parts = datePart.split('-');
+        if (parts.length === 3) {
+            let year = parseInt(parts[0]);
+            // ถ้าอยากให้เป็นปี พ.ศ. ให้ + 543 (ถ้าอยากได้ ค.ศ. ให้เอา +543 ออก)
+            let thaiYear = year > 2500 ? year : year + 543; 
+            return `${parts[2]}/${parts[1]}/${thaiYear}`;
+        }
+        return dateString;
+    }
 
     function searchTracking() {
         const name = document.getElementById("searchName").value.trim();
@@ -116,7 +131,7 @@
                 data.forEach(item => {
                     html += `
                         <div class="result-item">👤 <b>ชื่อผู้รับ:</b> ${item.name}</div>
-                        <div class="result-item">📅 <b>วันที่ส่ง:</b> ${item.date}</div>
+                        <div class="result-item">📅 <b>วันที่ส่ง:</b> ${formatDate(item.date)}</div>
                         <div class="result-item">🚚 <b>ขนส่ง:</b> ${item.courier}</div>
                         <div class="result-item">🏷️ <b>เลขพัสดุ:</b> ${item.trackingNo}</div>
                         <div class="result-item">📌 <b>สถานะ:</b> ${item.status}</div>
